@@ -1,8 +1,6 @@
 # Cherry Pi
 
-Inspired by the song "Cherry Pie" released by American glam metal band Warrant in 1990, Cherry Pi is my very own Raspberry Pi-based Guitar Pedal.
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/OjyZKfdwlng" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+Inspired by the song ["Cherry Pie"](https://www.youtube.com/embed/OjyZKfdwlng) released by American glam metal band Warrant in 1990, Cherry Pi is my very own Raspberry Pi-based Guitar Pedal.
 
 ## The Story
 
