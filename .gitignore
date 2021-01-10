@@ -2,3 +2,5 @@
 /spidev_test.c
 Samples/
 main
+ledtemp/
+/reference

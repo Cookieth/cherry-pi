@@ -6,6 +6,8 @@
 #include <linux/spi/spidev.h>
 #include <sys/ioctl.h>
 
+#include <wiringPi.h>
+
 #include <linux/gpio.h>
 //#include <gpiod.h>
 
@@ -17,7 +19,16 @@ static const char *device = "/dev/spidev0.0";
 // SPI Mode set to 0 (WHY??)
 static uint8_t mode = 0;
 static uint8_t bitsPerWord = 8;
-static uint32_t clockSpeed = 50000;
+static uint32_t clockSpeed = 100000;
+
+//PWM Stuff
+// Wiring Pi Pin 1 = GPIO 18 (PWM0)
+// Wiring Pi Pin 26 = GPIO 12 (PWM0)
+// Wiring Pi Pin 23 = GPIO 13 (PWM1)
+const int PWMHighValPin = 26;
+const int PWMLowValPin = 23;
+
+uint32_t input_signal = 0;
 
 uint32_t loop = 0;
 
@@ -37,6 +48,17 @@ int main(int argc, char **argv)
     if (fileDescriptor < 0)
         printAbort("Device cannot be accessed.");
 
+    // Sets up the wiringpi library (TODO: Find a sysfs solution to PWM)
+    if (wiringPiSetup() == -1)
+        printAbort("Wiring pi setup could not be loaded");
+
+    //LED Testing thing
+    //pinMode(PWMPin, PWM_OUTPUT);
+    pinMode(PWMLowValPin, PWM_OUTPUT);
+    pinMode(PWMHighValPin, PWM_OUTPUT);
+
+    pwmSetRange(64);
+
     // Setting the options for the Linux SPI File Descriptor
 
     // Modifies the file descriptor. See: https://www.man7.org/linux/man-pages/man2/ioctl.2.html
@@ -50,10 +72,7 @@ int main(int argc, char **argv)
 
     status = ioctl(fileDescriptor, SPI_IOC_WR_BITS_PER_WORD, &bitsPerWord);
     if (status == -1)
-    {
-        printf("Bits = %d\n", bitsPerWord);
         printAbort("Can't set SPI bits per word");
-    }
 
     status = ioctl(fileDescriptor, SPI_IOC_RD_BITS_PER_WORD, &bitsPerWord);
     if (status == -1)
@@ -69,7 +88,7 @@ int main(int argc, char **argv)
 
     uint8_t tx[] = {
         0x09};
-    uint8_t rx[2] = {
+    uint8_t rx[3] = {
         0,
     };
 
@@ -82,7 +101,11 @@ int main(int argc, char **argv)
         .bits_per_word = bitsPerWord,
     };
 
-    while (loop < 50000)
+    //pwmWrite(PWMPin, 512);
+    //pwmWrite(PWMLowValPin, 50);
+    //pwmWrite(PWMHighValPin, 20);
+
+    while (1)
     {
         loop++;
 
@@ -91,9 +114,30 @@ int main(int argc, char **argv)
         if (status < 1)
             printAbort("can't send spi message");
 
-        printf("%d%d", rx[0], rx[1]);
-        printf("\n");
+        //GPIO CONTROL: https://www.ics.com/blog/how-control-gpio-hardware-c-or-c
+        //PWM RESOURCE: http://blog.oddbit.com/post/2017-09-26-some-notes-on-pwm-on-the-raspberry-pi/
+
+        input_signal = rx[2] + ((rx[1] & 0x0F) << 8);
+
+        //**** CLEAN EFFECT ***///
+        //Nothing to do, the input_signal goes directly to the PWM output.
+        //printf("%d %d %d \n", rx[0], rx[1], rx[2]);
+        printf("%d \n", input_signal);
+        //generate output PWM signal 6 bits
+        //pwmWrite(PWMLowValPin, input_signal & 0x3F);
+        //pwmWrite(PWMHighValPin, input_signal >> 6);
+
+        //printf("%d %d\n", rx[0], rx[1]);
+        //printf("%d %d\n", (rx[0] >> 6), (rx[1] & 0x3F));
+        //printf("%d %d\n", (rx[0] >> 6) * 4, (rx[1] & 0x3F) * 4);
+        pwmWrite(PWMLowValPin, (input_signal & 0x3F));
+        pwmWrite(PWMHighValPin, (input_signal >> 6));
+
+        //printf("\n");
     }
+
+    pwmWrite(PWMLowValPin, 0);
+    pwmWrite(PWMHighValPin, 0);
 
     close(fileDescriptor);
 
