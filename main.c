@@ -109,31 +109,15 @@ int main(int argc, char **argv)
     {
         loop++;
 
-        // Write the transfer struct into the file descriptor
+        // Write the transfer struct into the file descriptor. This modifies rx
         status = ioctl(fileDescriptor, SPI_IOC_MESSAGE(1), &tr);
         if (status < 1)
             printAbort("can't send spi message");
 
-        //GPIO CONTROL: https://www.ics.com/blog/how-control-gpio-hardware-c-or-c
-        //PWM RESOURCE: http://blog.oddbit.com/post/2017-09-26-some-notes-on-pwm-on-the-raspberry-pi/
-
         input_signal = rx[2] + ((rx[1] & 0x0F) << 8);
 
-        //**** CLEAN EFFECT ***///
-        //Nothing to do, the input_signal goes directly to the PWM output.
-        //printf("%d %d %d \n", rx[0], rx[1], rx[2]);
-        printf("%d \n", input_signal);
-        //generate output PWM signal 6 bits
-        //pwmWrite(PWMLowValPin, input_signal & 0x3F);
-        //pwmWrite(PWMHighValPin, input_signal >> 6);
-
-        //printf("%d %d\n", rx[0], rx[1]);
-        //printf("%d %d\n", (rx[0] >> 6), (rx[1] & 0x3F));
-        //printf("%d %d\n", (rx[0] >> 6) * 4, (rx[1] & 0x3F) * 4);
         pwmWrite(PWMLowValPin, (input_signal & 0x3F));
         pwmWrite(PWMHighValPin, (input_signal >> 6));
-
-        //printf("\n");
     }
 
     pwmWrite(PWMLowValPin, 0);
