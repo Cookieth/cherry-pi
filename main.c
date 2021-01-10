@@ -5,23 +5,18 @@
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
 #include <sys/ioctl.h>
-
 #include <wiringPi.h>
-
 #include <linux/gpio.h>
-//#include <gpiod.h>
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 // SPI0 is being used
 static const char *device = "/dev/spidev0.0";
 
-// SPI Mode set to 0 (WHY??)
 static uint8_t mode = 0;
 static uint8_t bitsPerWord = 8;
 static uint32_t clockSpeed = 100000;
 
-//PWM Stuff
 // Wiring Pi Pin 1 = GPIO 18 (PWM0)
 // Wiring Pi Pin 26 = GPIO 12 (PWM0)
 // Wiring Pi Pin 23 = GPIO 13 (PWM1)
@@ -52,15 +47,12 @@ int main(int argc, char **argv)
     if (wiringPiSetup() == -1)
         printAbort("Wiring pi setup could not be loaded");
 
-    //LED Testing thing
-    //pinMode(PWMPin, PWM_OUTPUT);
     pinMode(PWMLowValPin, PWM_OUTPUT);
     pinMode(PWMHighValPin, PWM_OUTPUT);
 
     pwmSetRange(64);
 
     // Setting the options for the Linux SPI File Descriptor
-
     // Modifies the file descriptor. See: https://www.man7.org/linux/man-pages/man2/ioctl.2.html
     status = ioctl(fileDescriptor, SPI_IOC_WR_MODE, &mode);
     if (status == -1)
@@ -100,10 +92,6 @@ int main(int argc, char **argv)
         .speed_hz = clockSpeed,
         .bits_per_word = bitsPerWord,
     };
-
-    //pwmWrite(PWMPin, 512);
-    //pwmWrite(PWMLowValPin, 50);
-    //pwmWrite(PWMHighValPin, 20);
 
     while (1)
     {
