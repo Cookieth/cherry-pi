@@ -10,13 +10,13 @@ As a guitarist and Computer Engineering candidate, I've always been fascinated b
 
 The schematics for the hardware of this project were sourced from https://www.electrosmash.com/pedal-pi, however the sourcing of the parts, and assembly was done manually by myself. I did this both for educational purposes and practical ones too. All parts were sourced from DigiKey.
 
-[Image of Schematics]
+![Image of Schematics](https://i.stack.imgur.com/spVn1.jpg)
 
 Though my pedal has different switch configurations, I/O behaviour, CPU model (the Raspberry Pi Zero houses a BCM2835, while the Pi 4 Model B houses a BCM2711), the core parts are essentially the same. The pedal consists of three main parts: The Input Stage, the Power Supply Stage and the Output Stage.
 
-[Image of Breadboard Diagram]
+![Image of Schematics](https://i.imgur.com/YfcIT6n.jpg)
 
-The above displays my particular breadboard layout (at the time of prototyping), as well as a picture of the prototyped circuit.
+The above displays my particular breadboard layout (at the time of prototyping).
 
 One significant difference that the CPU change makes is that the BCM2835.h library could not be used. Rather, I decided to take an approach utilizing the sysfs interface for SPI communications with the MCP3202 ADC, and WiringPi's API functions for PWM analog output control. In particular I used the native linux `linux/spi/spidev.h` library for SPI control, and the `wiringPi.h` library for wiringPi functions.
 
